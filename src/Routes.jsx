@@ -1,8 +1,10 @@
-import React from "react";
-import { BrowserRouter, Routes as RouterRoutes, Route } from "react-router-dom";
-import ScrollToTop from "components/ScrollToTop";
-import ErrorBoundary from "components/ErrorBoundary";
-import NotFound from "pages/NotFound";
+import React from 'react';
+import { Routes as RouterRoutes, Route, Navigate } from 'react-router-dom';
+import ScrollToTop from 'components/ScrollToTop';
+import ErrorBoundary from 'components/ErrorBoundary';
+import ProtectedRoute from 'components/ProtectedRoute';
+import RedirectIfAuthenticated from 'components/RedirectIfAuthenticated';
+import NotFound from 'pages/NotFound';
 
 // Import all pages
 import SectionControllerLogin from './pages/section-controller-login';
@@ -16,31 +18,98 @@ import StationManagementHub from './pages/station-management-hub';
 
 const Routes = () => {
   return (
-    <BrowserRouter>
-      <ErrorBoundary>
+    <ErrorBoundary>
       <ScrollToTop />
       <RouterRoutes>
-        {/* Login Route */}
-        <Route path="/login" element={<SectionControllerLogin />} />
-        <Route path="/section-controller-login" element={<SectionControllerLogin />} />
+        {/* Public Routes (show login first) */}
+        <Route
+          path="/"
+          element={
+            <RedirectIfAuthenticated>
+              <SectionControllerLogin />
+            </RedirectIfAuthenticated>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <RedirectIfAuthenticated>
+              <SectionControllerLogin />
+            </RedirectIfAuthenticated>
+          }
+        />
+
+        {/* Protected Routes */}
+        <Route
+          path="/operations-control-center"
+          element={
+            <ProtectedRoute>
+              <OperationsControlCenter />
+            </ProtectedRoute>
+          }
+        />
         
-        {/* Main Application Routes */}
-        <Route path="/" element={<OperationsControlCenter />} />
-        <Route path="/operations-control-center" element={<OperationsControlCenter />} />
-        <Route path="/train-performance-analytics" element={<TrainPerformanceAnalytics />} />
-        <Route path="/station-management-hub" element={<StationManagementHub />} />
-        <Route path="/ai-decision-support" element={<AIDecisionSupport />} />
+        <Route
+          path="/train-performance-analytics"
+          element={
+            <ProtectedRoute>
+              <TrainPerformanceAnalytics />
+            </ProtectedRoute>
+          }
+        />
         
-        {/* Communication and Notifications */}
-        <Route path="/communication-center" element={<CommunicationCenter />} />
-        <Route path="/notifications" element={<NotificationsPage />} />
-        <Route path="/notification-details" element={<NotificationDetails />} />
+        <Route
+          path="/station-management-hub"
+          element={
+            <ProtectedRoute>
+              <StationManagementHub />
+            </ProtectedRoute>
+          }
+        />
+        
+        <Route
+          path="/ai-decision-support"
+          element={
+            <ProtectedRoute>
+              <AIDecisionSupport />
+            </ProtectedRoute>
+          }
+        />
+        
+        <Route
+          path="/communication-center"
+          element={
+            <ProtectedRoute>
+              <CommunicationCenter />
+            </ProtectedRoute>
+          }
+        />
+        
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <NotificationsPage />
+            </ProtectedRoute>
+          }
+        />
+        
+        <Route
+          path="/notification-details"
+          element={
+            <ProtectedRoute>
+              <NotificationDetails />
+            </ProtectedRoute>
+          }
+        />
+        
+        {/* Redirect old login route */}
+        <Route path="/section-controller-login" element={<Navigate to="/login" replace />} />
         
         {/* 404 Route */}
         <Route path="*" element={<NotFound />} />
       </RouterRoutes>
-      </ErrorBoundary>
-    </BrowserRouter>
+    </ErrorBoundary>
   );
 };
 

@@ -6,6 +6,8 @@ const NetworkMap = () => {
   const [selectedTrain, setSelectedTrain] = useState(null);
   const [mapView, setMapView] = useState('network'); // 'network' or 'trains'
   const [realTimeData, setRealTimeData] = useState({});
+  const [isRunning, setIsRunning] = useState(true);
+  const [speedMultiplier, setSpeedMultiplier] = useState(1);
   
   // Enhanced mock data for real-time train simulation
   const [trains, setTrains] = useState([
@@ -53,49 +55,108 @@ const NetworkMap = () => {
     }
   ]);
 
-  // Real-time simulation effect
+  // Define simple polyline paths for each train using the same SVG coordinate system (600x400 view)
+  // Keep these aligned with the drawn lines to look realistic enough for a mock simulation
+  const routePaths = useRef({
+    T001: [ // Along main horizontal line (upper track around y=200)
+      { x: 60, y: 200 },
+      { x: 250, y: 200 },
+      { x: 400, y: 200 },
+      { x: 540, y: 200 }
+    ],
+    T002: [ // Along lower horizontal line (y=240) going to Terminal (x≈500,y≈220)
+      { x: 80, y: 240 },
+      { x: 300, y: 240 },
+      { x: 400, y: 240 },
+      { x: 500, y: 220 }
+    ],
+    T003: [ // Diagonal line from (200,120) to (400,320)
+      { x: 200, y: 120 },
+      { x: 250, y: 170 },
+      { x: 300, y: 220 },
+      { x: 350, y: 270 },
+      { x: 400, y: 320 }
+    ]
+  });
+
+  const lerp = (a, b, t) => a + (b - a) * t;
+
+  // Given a path (array of points) and a progress 0..1, return interpolated x,y
+  const positionAlongPath = (path, progress) => {
+    if (!path || path.length === 0) return { x: 0, y: 0 };
+    if (path.length === 1) return path[0];
+    const segments = path.length - 1;
+    const scaled = Math.max(0, Math.min(0.9999, progress)) * segments;
+    const idx = Math.floor(scaled);
+    const t = scaled - idx;
+    const p0 = path[idx];
+    const p1 = path[idx + 1];
+    return { x: lerp(p0.x, p1.x, t), y: lerp(p0.y, p1.y, t) };
+  };
+
+  // Real-time simulation effect (rough mock)
   useEffect(() => {
     const interval = setInterval(() => {
+      if (!isRunning) return;
       setTrains(prevTrains => 
         prevTrains?.map(train => {
-          if (train?.status === 'running') {
+          const path = routePaths.current[train.id];
+          // Only move running trains
+          if (train?.status === 'running' && path) {
             // Simulate realistic train movement
             const speedVariation = Math.random() * 0.1 - 0.05; // ±5% speed variation
             const newSpeed = Math.max(0, train?.speed + speedVariation);
-            
-            // Update position based on speed
-            const progressIncrement = (newSpeed / 1000) * Math.random() * 2;
-            let newProgress = Math.min(1, train?.progress + progressIncrement);
-            
+
+            // Update progress based on speed and multiplier
+            const progressIncrement = (newSpeed / 1200) * speedMultiplier; // tuned factor for visual pacing
+            let newProgress = train?.progress + progressIncrement;
+            let reachedEnd = false;
+            if (newProgress >= 1) {
+              newProgress = 1;
+              reachedEnd = true;
+            }
+
+            // Update XY based on path
+            const pos = positionAlongPath(path, newProgress);
+
             // Simulate occasional delays
             let newDelay = train?.delay;
-            if (Math.random() > 0.98) {
-              newDelay += Math.random() > 0.6 ? 1 : 0;
+            if (Math.random() > 0.985) {
+              newDelay += Math.random() > 0.5 ? 1 : 0;
             }
-            
+
+            // If reached the end, flip direction by reversing progress to loop
+            let adjustedProgress = newProgress;
+            let adjustedStatus = train?.status;
+            if (reachedEnd) {
+              adjustedProgress = 0; // loop back for mock
+              adjustedStatus = 'running';
+            }
+
             return {
               ...train,
               speed: Math.round(newSpeed),
-              progress: newProgress,
-              delay: newDelay
+              progress: adjustedProgress,
+              delay: newDelay,
+              currentLocation: { x: pos.x, y: pos.y }
             };
           }
           return train;
         })
       );
-      
+
       // Update real-time metrics
-      setRealTimeData({
+      setRealTimeData(prev => ({
         timestamp: new Date()?.toLocaleTimeString(),
         totalTrains: trains?.length,
         activeTrains: trains?.filter(t => t?.status === 'running')?.length,
         avgSpeed: Math.round(trains?.reduce((sum, t) => sum + t?.speed, 0) / trains?.length),
         totalDelays: trains?.reduce((sum, t) => sum + t?.delay, 0)
-      });
-    }, 2000);
+      }));
+    }, 300);
 
     return () => clearInterval(interval);
-  }, [trains?.length]);
+  }, [isRunning, speedMultiplier, trains?.length]);
 
   const getTrainStatusColor = (train) => {
     if (train?.delay > 10) return '#ef4444'; // Red for major delays
@@ -122,7 +183,8 @@ const NetworkMap = () => {
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
               <span className="text-xs text-muted-foreground">Live Update</span>
             </div>
-            
+
+            {/* Map view toggle */}
             <div className="flex border border-border rounded-lg overflow-hidden">
               <button
                 onClick={() => setMapView('network')}
@@ -140,6 +202,31 @@ const NetworkMap = () => {
               >
                 Trains
               </button>
+            </div>
+
+            {/* Simulation controls */}
+            <div className="hidden md:flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hover:bg-muted"
+                onClick={() => setIsRunning(r => !r)}
+                title={isRunning ? 'Pause Simulation' : 'Resume Simulation'}
+              >
+                <Icon name={isRunning ? 'Pause' : 'Play'} size={14} className="mr-1" />
+                <span className="text-xs">{isRunning ? 'Pause' : 'Play'}</span>
+              </Button>
+              <div className="flex border border-border rounded-lg overflow-hidden text-xs">
+                {[1, 2, 4].map(mult => (
+                  <button
+                    key={mult}
+                    onClick={() => setSpeedMultiplier(mult)}
+                    className={`px-2 py-1 ${speedMultiplier === mult ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                  >
+                    {mult}x
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>

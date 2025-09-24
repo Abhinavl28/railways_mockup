@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import Icon from '../AppIcon';
 import Button from './Button';
 
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [isLeftNavOpen, setIsLeftNavOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState([
@@ -185,14 +187,28 @@ const Header = () => {
             </div>
 
             {/* User Profile */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
                 <Icon name="User" size={16} color="white" />
               </div>
-              <div className="hidden md:block">
-                <div className="text-sm font-medium text-foreground">Control Operator</div>
-                <div className="text-xs text-muted-foreground">Shift A - Day</div>
+              <div className="hidden md:flex md:flex-col">
+                <div className="text-sm font-medium text-foreground truncate max-w-[180px]">
+                  {user?.name || 'Control Operator'}
+                </div>
+                <div className="text-xs text-muted-foreground truncate max-w-[220px]">
+                  {user ? `${user.state} • ${user.region} • Section ${user.section}` : 'Shift A - Day'}
+                </div>
               </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={logout}
+                className="hover:bg-muted hidden sm:inline-flex"
+                title="Logout"
+              >
+                <Icon name="LogOut" size={16} className="mr-1" />
+                <span className="text-sm">Logout</span>
+              </Button>
             </div>
           </div>
         </div>
