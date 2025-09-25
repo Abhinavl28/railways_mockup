@@ -82,7 +82,7 @@ const NotificationsPage = () => {
       id: 'notif-005',
       title: 'Emergency Protocol Activated',
       message: 'Fire safety protocol activated at East Junction Station.',
-      detailedMessage: 'Fire safety protocol has been automatically activated at East Junction Station due to smoke detection in the electrical room. Fire department has been notified and is en route (ETA: 8 minutes). All passengers have been evacuated to safety zones. Platform 5 and 6 are temporarily out of service. Backup power systems are active. Fire suppression systems are on standby. Station Master Johnson is coordinating the response.',
+      detailedMessage: 'Fire safety protocol has been automatically activated at East Junction Station due to smoke detection in the electrical room. Fire department has been notified and is en route (ETA: 8 minutes). All passengers have been evacuated to safety zones. Platform 5 and 6 are temporarily out of service. Backup power systems are active. Fire suppression systems are on standby. Station Master Sharma is coordinating the response.',
       timestamp: '2024-01-15T13:15:00Z',
       type: 'error',
       priority: 'emergency',

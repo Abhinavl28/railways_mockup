@@ -192,7 +192,7 @@ const AIDecisionSupport = () => {
       description: "Diverted EXP-2401 via alternative route due to signal failure",
       status: "accepted",
       timestamp: "2024-01-15T08:30:00Z",
-      decidedBy: "Controller Smith",
+      decidedBy: "Controller Singh",
       outcome: 12,
       details: {
         originalPrediction: "15 min delay expected",
@@ -201,7 +201,7 @@ const AIDecisionSupport = () => {
       },
       feedback: [
         {
-          author: "Controller Smith",
+          author: "Controller Singh",
           timestamp: "2024-01-15T10:15:00Z",
           comment: "Excellent recommendation. Route-B was clear and passengers were informed promptly. Better outcome than predicted."
         }
@@ -213,7 +213,7 @@ const AIDecisionSupport = () => {
       description: "Rejected platform reallocation during peak hours",
       status: "rejected",
       timestamp: "2024-01-15T07:45:00Z",
-      decidedBy: "Station Master Johnson",
+      decidedBy: "Station Master Sharma",
       outcome: null,
       details: {
         originalPrediction: "8% throughput improvement",
@@ -227,7 +227,7 @@ const AIDecisionSupport = () => {
       description: "Implemented dynamic speed adjustments for Junction-B approach",
       status: "accepted",
       timestamp: "2024-01-15T09:20:00Z",
-      decidedBy: "Controller Davis",
+      decidedBy: "Controller Deshmukh",
       outcome: 8,
       details: {
         originalPrediction: "12% junction efficiency improvement",

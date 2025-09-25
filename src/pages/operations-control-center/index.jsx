@@ -5,6 +5,7 @@ import ContextBreadcrumb from '../../components/ui/ContextBreadcrumb';
 import KPICard from './components/KPICard';
 import NetworkMap from './components/NetworkMap';
 import AlertFeed from './components/AlertFeed';
+import TrafficSimulationAI from './components/TrafficSimulationAI';
 import ActiveTrainsTable from './components/ActiveTrainsTable';
 
 const OperationsControlCenter = () => {
@@ -122,12 +123,22 @@ const OperationsControlCenter = () => {
             <NetworkMap />
           </div>
 
-          {/* Alert Feed - Takes 1 column */}
-          <div className="lg:col-span-1">
-            <h2 className="text-xl font-semibold text-primary mb-4 border-l-4 border-primary pl-4">
-              System Alerts
-            </h2>
-            <AlertFeed />
+          {/* Right Sidebar Column */}
+          <div className="lg:col-span-1 space-y-6">
+            <div>
+              <h2 className="text-xl font-semibold text-primary mb-4 border-l-4 border-primary pl-4">
+                System Alerts
+              </h2>
+              <AlertFeed />
+            </div>
+
+            {/* AI Traffic Simulation Panel */}
+            <div>
+              <h2 className="text-xl font-semibold text-primary mb-4 border-l-4 border-primary pl-4">
+                Traffic Simulation (AI)
+              </h2>
+              <TrafficSimulationAI />
+            </div>
           </div>
         </div>
 

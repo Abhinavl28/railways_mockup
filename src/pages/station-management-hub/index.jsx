@@ -18,8 +18,8 @@ const StationManagementHub = () => {
     name: 'Day Shift A',
     start: '06:00',
     end: '14:00',
-    stationMaster: 'Robert Johnson',
-    assistants: ['Alice Brown', 'Michael Davis'],
+    stationMaster: 'Rajesh Kumar',
+    assistants: ['Aisha Sharma', 'Mohan Verma'],
     status: 'active'
   });
   const [emergencyAlert, setEmergencyAlert] = useState(null);
@@ -52,9 +52,9 @@ const StationManagementHub = () => {
   // Mock data for platforms - Add this block
   const platforms = [
     { id: 'P1A', name: 'Platform 1A', status: 'occupied', trainId: 'T001' },
-    { id: 'P1B', name: 'Platform 1B', status: 'occupied', trainId: 'T002' },
-    { id: 'P2A', name: 'Platform 2A', status: 'available' },
-    { id: 'P2B', name: 'Platform 2B', status: 'maintenance' },
+    { id: 'P1B', name: 'Platform 1B', status: 'boarding', trainId: 'T002' },
+    { id: 'P2A', name: 'Platform 2A', status: 'maintenance' },
+    { id: 'P2B', name: 'Platform 2B', status: 'occupied', trainId: 'T004' },
     { id: 'P3A', name: 'Platform 3A', status: 'available' },
     { id: 'P3B', name: 'Platform 3B', status: 'occupied', trainId: 'T003' }
   ];
@@ -77,42 +77,51 @@ const StationManagementHub = () => {
     }
   };
 
-  // Mock data for metrics
+  // Mock data for metrics (India-specific richer values)
   const metricsData = {
-    platformUtilization: 78.5,
-    passengerFlow: 1847,
-    onTimePerformance: 85.2,
-    averageDelay: 8.3,
-    activeAlerts: 3,
-    maintenanceItems: 2
+    platformUtilization: 83.4,
+    passengerFlow: 21750,
+    onTimePerformance: 88.6,
+    averageDelay: 6.7,
+    activeAlerts: 4,
+    maintenanceItems: 3
   };
 
-  // Mock data for trains
+  // Mock data for trains (expanded)
   const trains = [
     {
       id: 'T001',
-      number: '12345',
-      destination: 'Mumbai Central',
+      number: '22951',
+      destination: 'Pune Jn',
       platformId: 'P1A',
       arrivalTime: '14:30',
       status: 'delayed',
-      delay: 15
+      delay: 10
     },
     {
       id: 'T002',
-      number: '67890',
-      destination: 'Delhi Junction',
+      number: '12951',
+      destination: 'Mumbai Central',
       platformId: 'P1B',
-      arrivalTime: '15:15',
+      arrivalTime: '15:05',
       status: 'ontime'
     },
     {
       id: 'T003',
-      number: '11223',
-      destination: 'Chennai Express',
+      number: '12658',
+      destination: 'Chennai Central',
       platformId: 'P3B',
       arrivalTime: '16:00',
       status: 'early'
+    },
+    {
+      id: 'T004',
+      number: '11020',
+      destination: 'Bhubaneswar',
+      platformId: 'P2B',
+      arrivalTime: '15:40',
+      status: 'delayed',
+      delay: 18
     }
   ];
 
@@ -185,109 +194,109 @@ const StationManagementHub = () => {
     }
   ];
 
-  // Mock data for arrivals
+  // Mock data for arrivals (India-specific)
   const arrivals = [
     {
       id: 'A001',
-      trainNumber: '12345',
-      trainType: 'Express',
+      trainNumber: '22951',
+      trainType: 'Intercity',
       scheduledTime: '14:30',
-      actualTime: '14:45',
-      origin: 'New Delhi',
-      via: 'Agra, Jhansi',
+      actualTime: '14:40',
+      origin: 'Mumbai CST',
+      via: 'Dadar, Kalyan',
       platform: '1A',
       status: 'delayed',
-      delay: 15,
-      coaches: 24,
-      expectedLoad: 85
+      delay: 10,
+      coaches: 18,
+      expectedLoad: 82
     },
     {
       id: 'A002',
-      trainNumber: '67890',
-      trainType: 'Superfast',
-      scheduledTime: '15:15',
-      origin: 'Kolkata',
-      via: 'Dhanbad, Gaya',
+      trainNumber: '12951',
+      trainType: 'Rajdhani',
+      scheduledTime: '15:05',
+      origin: 'New Delhi',
+      via: 'Mathura, Kota',
       platform: '1B',
       status: 'ontime',
-      coaches: 22,
-      expectedLoad: 92
+      coaches: 20,
+      expectedLoad: 91
     },
     {
       id: 'A003',
-      trainNumber: '11223',
+      trainNumber: '12658',
       trainType: 'Mail',
       scheduledTime: '16:00',
-      actualTime: '15:55',
-      origin: 'Bangalore',
+      actualTime: '15:56',
+      origin: 'Bengaluru',
       platform: '3B',
       status: 'early',
-      early: 5,
-      coaches: 18,
-      expectedLoad: 67
+      early: 4,
+      coaches: 22,
+      expectedLoad: 68
     }
   ];
 
-  // Mock data for departures
+  // Mock data for departures (India-specific)
   const departures = [
     {
       id: 'D001',
-      trainNumber: '98765',
+      trainNumber: '11020',
       trainType: 'Express',
-      scheduledTime: '17:00',
-      destination: 'Hyderabad',
-      via: 'Nagpur, Wardha',
+      scheduledTime: '16:15',
+      destination: 'Bhubaneswar',
+      via: 'Solapur, Secunderabad',
       platform: '2B',
       status: 'boarding',
       coaches: 20,
-      expectedLoad: 78
+      expectedLoad: 79
     },
     {
       id: 'D002',
-      trainNumber: '54321',
+      trainNumber: '12450',
       trainType: 'Superfast',
-      scheduledTime: '17:30',
-      destination: 'Ahmedabad',
-      via: 'Vadodara, Surat',
+      scheduledTime: '16:45',
+      destination: 'New Delhi',
+      via: 'Vadodara, Kota',
       platform: '4A',
       status: 'ontime',
-      coaches: 16,
-      expectedLoad: 65
+      coaches: 18,
+      expectedLoad: 66
     },
     {
       id: 'D003',
-      trainNumber: '77889',
+      trainNumber: '12130',
       trainType: 'Passenger',
-      scheduledTime: '18:15',
+      scheduledTime: '17:10',
       destination: 'Nashik Road',
       platform: '2A',
       status: 'delayed',
-      delay: 10,
-      coaches: 12,
-      expectedLoad: 45
+      delay: 7,
+      coaches: 14,
+      expectedLoad: 47
     }
   ];
 
-  // Mock data for maintenance requests
+  // Mock data for maintenance requests (India-specific)
   const maintenanceRequests = [
     {
       id: 'MR001',
       platform: '3A',
-      issue: 'Signal malfunction on track T3',
+      issue: 'Point machine alignment on turnout T3',
       priority: 'high',
       reportedTime: '13:45'
     },
     {
       id: 'MR002',
       platform: '5B',
-      issue: 'Platform lighting requires replacement',
+      issue: 'Platform lighting ballast replacement',
       priority: 'medium',
       reportedTime: '12:30'
     },
     {
       id: 'MR003',
       platform: '2A',
-      issue: 'Announcement system crackling',
+      issue: 'PA system crackle near coach markers',
       priority: 'low',
       reportedTime: '11:15'
     }
@@ -482,7 +491,7 @@ const StationManagementHub = () => {
                   </div>
                   <div>
                     <div className="font-semibold text-foreground">Section Controller</div>
-                    <div className="text-sm text-muted-foreground">Alice Brown - North Section</div>
+                    <div className="text-sm text-muted-foreground">Aisha Sharma - North Section</div>
                     <div className="flex items-center space-x-1 text-xs text-success">
                       <div className="w-2 h-2 bg-success rounded-full"></div>
                       <span>Online</span>
@@ -503,7 +512,7 @@ const StationManagementHub = () => {
                   </div>
                   <div>
                     <div className="font-semibold text-foreground">Station Master</div>
-                    <div className="text-sm text-muted-foreground">Robert Johnson - Central Station</div>
+                    <div className="text-sm text-muted-foreground">Rajesh Kumar - Central Station</div>
                     <div className="flex items-center space-x-1 text-xs text-success">
                       <div className="w-2 h-2 bg-success rounded-full"></div>
                       <span>Active</span>

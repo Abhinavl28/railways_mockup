@@ -9,9 +9,11 @@ import Input from '../../components/ui/Input';
 import ContactList from './components/ContactList';
 import MessageArea from './components/MessageArea';
 import MessageComposer from './components/MessageComposer';
+import { useAuth } from '../../contexts/AuthContext';
 
 const CommunicationCenter = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [activeContact, setActiveContact] = useState(null);
   const [messages, setMessages] = useState({});
   const [onlineUsers, setOnlineUsers] = useState([]);
@@ -24,7 +26,7 @@ const CommunicationCenter = () => {
   const contacts = [
     {
       id: 'sm-001',
-      name: 'Robert Johnson',
+      name: 'Rajesh Kumar',
       role: 'Station Master',
       station: 'Central Station',
       status: 'online',
@@ -34,7 +36,7 @@ const CommunicationCenter = () => {
     },
     {
       id: 'sc-002', 
-      name: 'Alice Brown',
+      name: 'Aisha Sharma',
       role: 'Section Controller',
       section: 'North Section',
       status: 'online',
@@ -44,7 +46,7 @@ const CommunicationCenter = () => {
     },
     {
       id: 'sm-003',
-      name: 'Michael Davis',
+      name: 'Mohan Verma',
       role: 'Station Master',
       station: 'East Junction',
       status: 'busy',
@@ -54,7 +56,7 @@ const CommunicationCenter = () => {
     },
     {
       id: 'sc-004',
-      name: 'Sarah Wilson',
+      name: 'Sunita Yadav',
       role: 'Section Controller', 
       section: 'South Section',
       status: 'away',
@@ -64,7 +66,7 @@ const CommunicationCenter = () => {
     },
     {
       id: 'sm-005',
-      name: 'David Chen',
+      name: 'Deepak Mehta',
       role: 'Station Master',
       station: 'West Terminal',
       status: 'offline',
@@ -74,7 +76,7 @@ const CommunicationCenter = () => {
     },
     {
       id: 'sc-006',
-      name: 'Emma Thompson',
+      name: 'Meera Iyer',
       role: 'Section Controller',
       section: 'Central Section',
       status: 'online',
@@ -115,13 +117,41 @@ const CommunicationCenter = () => {
   useEffect(() => {
     // Set online users
     setOnlineUsers(contacts?.filter(c => c?.status === 'online')?.map(c => c?.id));
-    
-    // Initialize messages for each contact
-    const initialMessages = {};
-    contacts?.forEach(contact => {
-      initialMessages[contact.id] = [];
-    });
-    setMessages(initialMessages);
+
+    const key = (suffix) => `${user?.id || 'guest'}_${suffix}`;
+
+    // Attempt to restore persisted state
+    try {
+      const storedMessages = localStorage.getItem(key('cc_messages'));
+      const storedActiveId = localStorage.getItem(key('cc_active_contact_id'));
+      const storedNotifications = localStorage.getItem(key('cc_notifications'));
+
+      if (storedMessages) {
+        setMessages(JSON.parse(storedMessages));
+      } else {
+        // Initialize messages for each contact if nothing stored
+        const initialMessages = {};
+        contacts?.forEach(contact => {
+          initialMessages[contact.id] = [];
+        });
+        setMessages(initialMessages);
+      }
+
+      if (storedNotifications) {
+        setNotifications(JSON.parse(storedNotifications));
+      }
+
+      if (storedActiveId) {
+        const contact = contacts?.find(c => c?.id === storedActiveId);
+        if (contact) setActiveContact(contact);
+      }
+    } catch (e) {
+      // If parsing fails, clear corrupted storage
+      const key = (suffix) => `${user?.id || 'guest'}_${suffix}`;
+      localStorage.removeItem(key('cc_messages'));
+      localStorage.removeItem(key('cc_active_contact_id'));
+      localStorage.removeItem(key('cc_notifications'));
+    }
 
     // Simulate incoming messages
     const messageInterval = setInterval(() => {
@@ -131,7 +161,29 @@ const CommunicationCenter = () => {
     }, 10000);
 
     return () => clearInterval(messageInterval);
-  }, []);
+  }, [user?.id]);
+
+  // Persist state when it changes
+  useEffect(() => {
+    try {
+      const key = (suffix) => `${user?.id || 'guest'}_${suffix}`;
+      localStorage.setItem(key('cc_messages'), JSON.stringify(messages));
+    } catch {}
+  }, [messages, user?.id]);
+
+  useEffect(() => {
+    try {
+      const key = (suffix) => `${user?.id || 'guest'}_${suffix}`;
+      localStorage.setItem(key('cc_notifications'), JSON.stringify(notifications));
+    } catch {}
+  }, [notifications, user?.id]);
+
+  useEffect(() => {
+    try {
+      const key = (suffix) => `${user?.id || 'guest'}_${suffix}`;
+      localStorage.setItem(key('cc_active_contact_id'), activeContact?.id || '');
+    } catch {}
+  }, [activeContact?.id, user?.id]);
 
   useEffect(() => {
     scrollToBottom();
@@ -217,6 +269,18 @@ const CommunicationCenter = () => {
       ...prev,
       [activeContact?.id]: [...(prev?.[activeContact?.id] || []), newMessage]
     }));
+  };
+
+  const handleClearChat = () => {
+    if (!activeContact) return;
+    const confirmClear = window.confirm(`Clear chat with ${activeContact?.name}? This cannot be undone.`);
+    if (!confirmClear) return;
+    setMessages(prev => ({
+      ...prev,
+      [activeContact?.id]: []
+    }));
+    // Remove notifications for this contact too
+    setNotifications(prev => prev?.filter(n => n?.contactId !== activeContact?.id));
   };
 
   const handleEmergencyBroadcast = (message, recipients = 'all') => {
@@ -398,6 +462,9 @@ const CommunicationCenter = () => {
                       </Button>
                       <Button variant="outline" size="sm">
                         <Icon name="Video" size={16} />
+                      </Button>
+                      <Button variant="destructive" size="sm" onClick={handleClearChat} title="Clear Chat">
+                        <Icon name="Trash2" size={16} />
                       </Button>
                       <Button variant="outline" size="sm">
                         <Icon name="MoreVertical" size={16} />
